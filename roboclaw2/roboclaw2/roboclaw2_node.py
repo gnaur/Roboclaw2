@@ -100,9 +100,12 @@ class RoboClaw2(Node):
         self.mtr_status_pub = self.create_publisher(RoboClawStatus,"mtr_status", 50)
         self.got_cmd_vel = False
 
+        self.status_update_rate =100 # send status every 100 updates
+        self.status_update_count = self.status_update_rate
+
         self.initRoboClaw()
 
-        timer_period = 1.0/40.0  # seconds
+        timer_period = 1.0/15.0  # seconds
         self.timer = self.create_timer(timer_period, self.run)
 
         self.get_logger().info("Roboclaw2 Started")
@@ -115,19 +118,19 @@ class RoboClaw2(Node):
         D=0x00
         
         #roboclaw.SetConfig(self.rc_address,0x3 + 0xA0 + 0x10) 
-        roboclaw.SetMainVoltages(self.rc_address,90,140)
-        roboclaw.SetLogicVoltages(self.rc_address,110,130)
+        #roboclaw.SetMainVoltages(self.rc_address,90,140)
+        #roboclaw.SetLogicVoltages(self.rc_address,110,130)
         
-        roboclaw.SetM1EncoderMode(self.rc_address,0x0)
-        roboclaw.SetM2EncoderMode(self.rc_address,0x0)
+        #roboclaw.SetM1EncoderMode(self.rc_address,0x0)
+        #roboclaw.SetM2EncoderMode(self.rc_address,0x0)
         
-        roboclaw.SetPWMMode(self.rc_address,1)
+        #roboclaw.SetPWMMode(self.rc_address,1)
         
-        roboclaw.SetM1MaxCurrent(self.rc_address,500)
-        roboclaw.SetM2MaxCurrent(self.rc_address,500)
+        #roboclaw.SetM1MaxCurrent(self.rc_address,0x7FFFFFFF)
+        #roboclaw.SetM2MaxCurrent(self.rc_address,0x7FFFFFFF)
         
-        roboclaw.SetM1VelocityPID(self.rc_address,P,I,D,qpps)
-        roboclaw.SetM2VelocityPID(self.rc_address,P,I,D,qpps)
+        #roboclaw.SetM1VelocityPID(self.rc_address,P,I,D,qpps)
+        #roboclaw.SetM2VelocityPID(self.rc_address,P,I,D,qpps)
         
         self.mc_version = "Unknown"
         mc_tp = roboclaw.ReadVersion(self.rc_address)
@@ -147,7 +150,7 @@ class RoboClaw2(Node):
             if self.got_cmd_vel:
                 self.got_cmd_vel = False
                 #print("send speed %d,%d" % (int(self.Pl),int(self.Pr)))
-                roboclaw.SpeedM1M2(self.rc_address,int(self.Pl),int(self.Pr))
+                roboclaw.SpeedM1M2(self.rc_address,int(self.Pr),int(self.Pl))
                 self.last_sent_time = self.get_clock().now()
 		  
         except Exception as ex:
@@ -156,14 +159,14 @@ class RoboClaw2(Node):
 
         if (now - self.last_sent_time).nanoseconds/1.0e9 > 0.25:
             try:
-                #print("send speed 0,0")
+                self.get_logger().info("send speed 0,0")
                 roboclaw.SpeedM1M2(self.rc_address,0,0)
                 self.last_sent_time = now
             except  Exception as ex:
                 self.get_logger().info( "Exception publishing 0 velocity: %s" % ex)
 
         try:
-
+          
             s1 = roboclaw.ReadSpeedM1(self.rc_address)
             s2 = roboclaw.ReadSpeedM2(self.rc_address)
             e1 = roboclaw.ReadEncM1(self.rc_address)
@@ -172,65 +175,66 @@ class RoboClaw2(Node):
             dir1 = 1 if s1[2]==0 else -1
             dir2 = 1 if s2[2]==0 else -1
 
-            cnt_l = dir1*s1[1]*self.lin_dir
-            cnt_r = dir2*s2[1]*self.lin_dir
+            cnt_r = dir1*s1[1]*self.lin_dir
+            cnt_l = dir2*s2[1]*self.lin_dir
 
-            al=self.enc_to_angle(e1)
-            ar=self.enc_to_angle(e2)
+            ar=self.enc_to_angle(e1)
+            al=self.enc_to_angle(e2)
 
             self.odom_pub.publishOdom(cnt_l/self.vel_scale,cnt_r/self.vel_scale,al,ar)
 
         except Exception as ex:
             self.get_logger().info( "Exception publishing ODOM: %s" % ex)
 
+        self.status_update_count -= 1
 
-        try:
+        if self.status_update_count ==0:
+            self.status_update_count = self.status_update_rate
 
-            mc_sts=-1
-            mc_tp = roboclaw.ReadError(self.rc_address)
-            if mc_tp[0]==1:
-                mc_sts = mc_tp[1]
+            try:
+            
+                mc_sts=-1
+                mc_tp = roboclaw.ReadError(self.rc_address)
+                if mc_tp[0]==1:
+                    mc_sts = mc_tp[1]
+    
+                mc_bat_volt=-1.0
+                mc_tp = roboclaw.ReadMainBatteryVoltage(self.rc_address)
+                if mc_tp[0]==1:
+                    mc_bat_volt = mc_tp[1]/10.0
+                
+                mc_logic_volt=-1.0
+                mc_tp = roboclaw.ReadLogicBatteryVoltage(self.rc_address)
+                if mc_tp[0]==1:
+                    mc_logic_volt = mc_tp[1]/10.0
+                
+                mc_temp_1=-1.0
+                mc_tp = roboclaw.ReadTemp(self.rc_address)
+                if mc_tp[0]==1:
+                    mc_temp_1 = mc_tp[1]/10.0
+                
+                mc_temp_2=-1.0
+                mc_tp = roboclaw.ReadTemp2(self.rc_address)
+                if mc_tp[0]==1:
+                    mc_temp_2 = mc_tp[1]/10.0
 
+            except Exception as ex:
+                self.get_logger().info( "Exception reading roboclaw: %s" % ex)
 
             
-            mc_bat_volt=-1.0
-            mc_tp = roboclaw.ReadMainBatteryVoltage(self.rc_address)
-            if mc_tp[0]==1:
-                mc_bat_volt = mc_tp[1]/10.0
-            
-            
-            mc_logic_volt=-1.0
-            mc_tp = roboclaw.ReadLogicBatteryVoltage(self.rc_address)
-            if mc_tp[0]==1:
-                mc_logic_volt = mc_tp[1]/10.0
-            
-            mc_temp_1=-1.0
-            mc_tp = roboclaw.ReadTemp(self.rc_address)
-            if mc_tp[0]==1:
-                mc_temp_1 = mc_tp[1]/10.0
-            
-            mc_temp_2=-1.0
-            mc_tp = roboclaw.ReadTemp2(self.rc_address)
-            if mc_tp[0]==1:
-                mc_temp_2 = mc_tp[1]/10.0
+            try:
+                rcs=RoboClawStatus()
+    
+                rcs.status=mc_sts
+                rcs.version=self.mc_version
+                rcs.motor_batt_volt=mc_bat_volt
+                rcs.logic_batt_volt=mc_logic_volt
+                rcs.temp1=mc_temp_1
+                rcs.temp2=mc_temp_2
 
-        except Exception as ex:
-            self.get_logger().info( "Exception reading roboclaw: %s" % ex)
-
-        
-        try:
-            rcs=RoboClawStatus()
-
-            rcs.status=mc_sts
-            rcs.version=self.mc_version
-            rcs.motor_batt_volt=mc_bat_volt
-            rcs.logic_batt_volt=mc_logic_volt
-            rcs.temp1=mc_temp_1
-            rcs.temp2=mc_temp_2
-
-            self.mtr_status_pub.publish(rcs)
-        except Exception as ex:
-            self.get_logger().info ("Exception publishing motor status: %s" % ex)
+                self.mtr_status_pub.publish(rcs)
+            except Exception as ex:
+                self.get_logger().info ("Exception publishing motor status: %s" % ex)
 
     def check_enc_over_flow(self,enc):
         dir = 1 if (enc[2] & 2) == 0 else -1
