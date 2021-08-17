@@ -115,19 +115,19 @@ class RoboClaw2(Node):
         D=0x00
         
         #roboclaw.SetConfig(self.rc_address,0x3 + 0xA0 + 0x10) 
-        roboclaw.SetMainVoltages(self.rc_address,90,140)
-        roboclaw.SetLogicVoltages(self.rc_address,110,130)
+        #roboclaw.SetMainVoltages(self.rc_address,90,140)
+        #roboclaw.SetLogicVoltages(self.rc_address,110,130)
         
-        roboclaw.SetM1EncoderMode(self.rc_address,0x0)
-        roboclaw.SetM2EncoderMode(self.rc_address,0x0)
+        #roboclaw.SetM1EncoderMode(self.rc_address,0x0)
+        #roboclaw.SetM2EncoderMode(self.rc_address,0x0)
         
-        roboclaw.SetPWMMode(self.rc_address,1)
+        #roboclaw.SetPWMMode(self.rc_address,1)
         
-        roboclaw.SetM1MaxCurrent(self.rc_address,500)
-        roboclaw.SetM2MaxCurrent(self.rc_address,500)
+        #roboclaw.SetM1MaxCurrent(self.rc_address,500)
+        #roboclaw.SetM2MaxCurrent(self.rc_address,500)
         
-        roboclaw.SetM1VelocityPID(self.rc_address,P,I,D,qpps)
-        roboclaw.SetM2VelocityPID(self.rc_address,P,I,D,qpps)
+        #roboclaw.SetM1VelocityPID(self.rc_address,P,I,D,qpps)
+        #roboclaw.SetM2VelocityPID(self.rc_address,P,I,D,qpps)
         
         self.mc_version = "Unknown"
         mc_tp = roboclaw.ReadVersion(self.rc_address)

@@ -1,14 +1,10 @@
 roboclaw:
   ros__parameters:
-  
     com_port : "/dev/ttyUSB0"
     baud_rate : 230400
-
-   
-    base_width : 0.41
-    wheel_radius : 0.085
-    encoder_resolution : 4096.0
-    
+    base_width : 0.286
+    wheel_radius : 0.081
+    encoder_resolution : 1860.0
     publish_tf: True
     publish_joint_states: True
     
