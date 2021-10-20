@@ -126,8 +126,10 @@ class RoboClaw2(Node):
         
         #roboclaw.SetPWMMode(self.rc_address,1)
         
-        #roboclaw.SetM1MaxCurrent(self.rc_address,0x7FFFFFFF)
-        #roboclaw.SetM2MaxCurrent(self.rc_address,0x7FFFFFFF)
+
+        #roboclaw.SetM1MaxCurrent(self.rc_address,500)
+        #roboclaw.SetM2MaxCurrent(self.rc_address,500)
+
         
         #roboclaw.SetM1VelocityPID(self.rc_address,P,I,D,qpps)
         #roboclaw.SetM2VelocityPID(self.rc_address,P,I,D,qpps)
