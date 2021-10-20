@@ -159,7 +159,7 @@ class RoboClaw2(Node):
 
         if (now - self.last_sent_time).nanoseconds/1.0e9 > 0.25:
             try:
-                self.get_logger().info("send speed 0,0")
+                #self.get_logger().info("send speed 0,0")
                 roboclaw.SpeedM1M2(self.rc_address,0,0)
                 self.last_sent_time = now
             except  Exception as ex:
@@ -172,14 +172,17 @@ class RoboClaw2(Node):
             e1 = roboclaw.ReadEncM1(self.rc_address)
             e2 = roboclaw.ReadEncM2(self.rc_address)
             
-            dir1 = 1 if s1[2]==0 else -1
-            dir2 = 1 if s2[2]==0 else -1
+            #self.get_logger().info("s1 %s, s2 %s, e1 %s, e2 %s" %(str(s1),str(s2),str(e1),str(e2)))
+            dir1 = 1 #if (s1[2])==0 else -1
+            dir2 = 1 #if (s2[2])==0 else -1
 
             cnt_r = dir1*s1[1]*self.lin_dir
             cnt_l = dir2*s2[1]*self.lin_dir
 
             ar=self.enc_to_angle(e1)
             al=self.enc_to_angle(e2)
+
+            #self.get_logger().info( "Tel: vl %f vr %f scale %f" % (cnt_l,cnt_r,self.vel_scale))
 
             self.odom_pub.publishOdom(cnt_l/self.vel_scale,cnt_r/self.vel_scale,al,ar)
 

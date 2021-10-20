@@ -128,17 +128,17 @@ class OdomPub(object):
         #next, we'll publish the odometry message over ROS
 
         pcv = [0.0 for x in range(36) ]
-        pcv[0]  = 0.01
-        pcv[7]  = 0.01
-        pcv[14] = 99999.0
-        pcv[21] = 99999.0
-        pcv[28] = 99999.0
-        pcv[35] = 0.01
+        pcv[0]  = 0.000035
+        pcv[7]  = 0.000035
+        pcv[14] = 1e-9
+        pcv[21] = 1e-9
+        pcv[28] = 1e-9
+        pcv[35] = 0.006
 
         tcv = pcv
  
-        tcv[0]  = 0.01
-        tcv[7]  = 0.01
+        #tcv[0]  = 0.01
+        #tcv[7]  = 0.01
         odom = Odometry()
         odom.header.stamp = current_time.to_msg()
         odom.header.frame_id =self.odom_frame
