@@ -128,12 +128,12 @@ class OdomPub(object):
         #next, we'll publish the odometry message over ROS
 
         pcv = [0.0 for x in range(36) ]
-        pcv[0]  = 0.000035
-        pcv[7]  = 0.000035
-        pcv[14] = 1e-9
-        pcv[21] = 1e-9
-        pcv[28] = 1e-9
-        pcv[35] = 0.006
+        pcv[0]  = 0.00035
+        pcv[7]  = 0.00035
+        pcv[14] = 1e-8
+        pcv[21] = 1e-8
+        pcv[28] = 1e-8
+        pcv[35] = 0.010
 
         tcv = pcv
  
