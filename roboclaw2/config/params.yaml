@@ -7,7 +7,7 @@ roboclaw:
     wheel_radius:  0.09
     encoder_resolution: 1860.0
 
-    publish_tf: True
+    publish_tf: False
     publish_joint_states: True
     
     

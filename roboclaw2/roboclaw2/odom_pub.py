@@ -130,9 +130,9 @@ class OdomPub(object):
         pcv = [0.0 for x in range(36) ]
         pcv[0]  = 0.00035
         pcv[7]  = 0.00035
-        pcv[14] = 1e-8
-        pcv[21] = 1e-8
-        pcv[28] = 1e-8
+        pcv[14] = 1e-2
+        pcv[21] = 1e-2
+        pcv[28] = 1e-2
         pcv[35] = 0.010
 
         tcv = pcv
